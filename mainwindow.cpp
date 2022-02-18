@@ -10,7 +10,9 @@ MainWindow::MainWindow(QWidget *parent)
     timer_echo = new QTimer;
     timer_echo->setInterval(1000);
 
-    COM = new QSerialPort(this);
+    COM = new QSerialPort;
+    //COM->moveToThread(&thread_1);
+    //thread_1.start();
     foreach(const QSerialPortInfo &info, QSerialPortInfo::availablePorts())
         ui->com_combobox->addItem(info.portName());
 
@@ -37,8 +39,10 @@ void MainWindow::connectCOM(void)
     COM->setStopBits(QSerialPort::OneStop);
     COM->setFlowControl(QSerialPort::NoFlowControl);
     COM->setReadBufferSize(0);
+
     if(COM->open(QSerialPort::ReadWrite))
     {
+        COM->setBreakEnabled(true);
         ui->comstate_label->setText("<FONT COLOR=#008000>Opened</FONT>");
         com_mode = 1;
         ui->com_button->setText("Close port");
@@ -70,18 +74,18 @@ void MainWindow::getEcho(void)
         crc ^= ba_1.at(i);
     }
     ba_1.append(crc);
-    if(COM->write(ba_1) != -1)
+    if(COM->write(ba_1, 6) != -1)
     {
         COM->waitForBytesWritten(200);
         COM->waitForReadyRead(300);
     }
-    ui->echo_button->setEnabled(false);
+    //ui->echo_button->setEnabled(false);
 }
 
 void MainWindow::timer_echo_timeout()
 {
     ui->service_message->setText("Empty");
-    ui->echo_button->setEnabled(true);
+    //ui->echo_button->setEnabled(true);
 }
 
 void MainWindow::on_com_refresh_button_clicked()
@@ -201,6 +205,8 @@ void MainWindow::on_checkBox_stateChanged(int arg1)
 
 MainWindow::~MainWindow()
 {
+    thread_1.terminate();
+
     delete ui;
 }
 

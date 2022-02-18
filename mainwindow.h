@@ -9,6 +9,7 @@
 #include <QTimer>
 #include <QByteArray>
 #include <QDebug>
+#include <QThread>
 
 #define	SYNCHRO                                 0x02
 #define UART_ADDR                               0x0A
@@ -61,11 +62,13 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    QThread                 thread_1;
+    QSerialPort             *COM;
 
 private:
     Ui::MainWindow *ui;
 
-    QSerialPort             *COM;
+
     QTimer                  *timer_echo;
     uint8_t                 com_mode;
     uint8_t                 uart_command;
